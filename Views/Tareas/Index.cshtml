@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Tareas";
+    Layout = "../Shared/_LayoutTareas.cshtml";
 }
 
 <header class="d-flex justify-content-between align-items-center">
@@ -10,7 +11,7 @@
     </button>
 </header>
 
-<table class="table table-striped table-hover">
+@* <table class="table table-striped table-hover">
   <thead class="table-dark">
     <tr>
         <th> Descripcion </th>
@@ -23,7 +24,7 @@
   <tbody id="tBody">
     
   </tbody>
-</table>
+</table> *@
 
 <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -70,5 +71,5 @@
 
 
 @section Scripts {
-    <script src="~/js/tareas.js"></script>
+ 
 }

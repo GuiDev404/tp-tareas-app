@@ -8,44 +8,34 @@ function obtenerTareas() {
     dataType : 'json',
     success : function(resultado) {
       if(resultado){
-        const tBody = document.getElementById('tBody');
-        tBody.innerHTML = ''
+        console.log(resultado);
+        const listTask = document.getElementById('list-task')
+        const bgPrioridades = ['bg-danger', 'bg-warning', 'bg-info']
 
-        resultado.forEach(tarea => {
-          let acciones = `
-            <button class="btn btn-primary" onclick="setearTarea(${tarea.tareaID})"> Editar </button>
-            <button class="btn btn-danger" onclick="eliminarTarea(${tarea.tareaID})"> 
-              Deshabilitar
-            </button>
-          `;
+        const tareas = resultado.map(tarea=> `
+          <p class="my-0 position-sticky py-2 px-3 border-bottom border-top date_task">
+            <i class="bi bi-calendar2-week"></i>
+            <small class="fw-bold ms-2">
+              ${tarea.fecha}
+            </small>
+          </p>
 
-          if(tarea.eliminada){
-            acciones = `<button class="btn btn-success" onclick="eliminarTarea(${tarea.tareaID})">
-              Habilitar
-            </button>`
-          }
+          ${tarea.tareas.map(t=> `
+            <a href="#" class="list-group-item list-group-item-action py-3 lh-tight">
+              <div class="d-flex w-100 align-items-center justify-content-between">
+                <strong class="mb-1">${t.descripcion}</strong>
+                <span class="small badge ${bgPrioridades[t.prioridad]}">
+                  ${t.prioridadString}
+                </span>
+              </div>
+              <div class="col-10 mb-1 small">  </div>
+            </a>
+          `).join('')}
+        `)
+        .join('')
 
-          const coloresPrioridad = ['danger', 'warning', 'info']
-          const colorPrioridad = coloresPrioridad[tarea.prioridad];
-
-          tBody.innerHTML += `
-            <tr class="${tarea.realizada ? 'tarea-completada' : ''}">  
-                <td> ${tarea.descripcion} </td>
-                <td> ${tarea.fechaFormateada} </td>
-                <td> 
-                    <span class="badge bg-${colorPrioridad}"> ${tarea.prioridadString} </span>
-                </td>
-                <td>
-                  <label>
-                    <input type="checkbox" ${tarea.realizada ? 'checked' : ''} onchange="completarTarea(${tarea.tareaID});" ${tarea.eliminada ? 'disabled' : ''} />
-                    Listo
-                  </label>
-                </td>
-                <td> ${acciones} </td>
-            </tr>
-          `;
-          
-        });
+        listTask.innerHTML = tareas;
+      
       }
     },
     error: function (error){

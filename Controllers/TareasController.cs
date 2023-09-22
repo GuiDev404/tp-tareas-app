@@ -38,13 +38,17 @@ public class TareasController : Controller
     public JsonResult ObtenerTareas (int? tareaId){
         string usuarioIDActual = _userManager.GetUserId(HttpContext.User);
 
-        IEnumerable<Tarea> tareas = _context.Tareas
+        var tareas = _context.Tareas
             .Where(t => t.UsuarioID == usuarioIDActual)
-            .OrderBy(t=> t.Prioridad)
-            .OrderByDescending(tarea => tarea.Fecha);
+            .ToList() // Traer los datos de la base de datos a la memoria
+            .GroupBy(g => g.FechaFormateada)
+            .Select(f => new { fecha = f.Key, tareas = f.OrderBy(t=> t.Prioridad) })
+            .OrderByDescending(t=> t.fecha);
 
         if(tareaId != null){
-            tareas = tareas.Where(tarea => tarea.TareaID == tareaId);
+            // tareas = tareas
+            //     .Select(a=> a.tareas.FirstOrDefault(t=> t.TareaID == tareaId) )
+            //     .ToList();
         }
 
         return Json(tareas);
