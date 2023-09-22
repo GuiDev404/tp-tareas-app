@@ -1,5 +1,26 @@
 console.log('TAREAS')
 
+function limpiarFormulario() {
+  $('#tareaId').val(0);
+  $('#prioridad').val(-1);
+  document.getElementById('modalForm').reset();
+} 
+
+
+$('#modal').on('hide.bs.modal', function (event) {
+  const tareaId = $('#tareaId').val()
+
+  if(tareaId !== '0'){
+    limpiarFormulario()
+  }
+})
+
+$('#modal').on('shown.bs.modal	', function (event) {
+  const tareaId = $('#tareaId').val()
+  
+  document.querySelector('.modal-title').innerText = (tareaId === '0' ? 'Nueva tarea' : 'Actualizar tarea');
+})
+
 function obtenerTareas() {
 
   $.ajax({
@@ -13,7 +34,9 @@ function obtenerTareas() {
 
         resultado.forEach(tarea => {
           let acciones = `
-            <button class="btn btn-primary" onclick="setearTarea(${tarea.tareaID})"> Editar </button>
+            ${!tarea.realizada 
+                ? `<button class="btn btn-primary" onclick="setearTarea(${tarea.tareaID})"> Editar </button>` : ''
+            }
             <button class="btn btn-danger" onclick="eliminarTarea(${tarea.tareaID})"> 
               Deshabilitar
             </button>
@@ -29,16 +52,15 @@ function obtenerTareas() {
           const colorPrioridad = coloresPrioridad[tarea.prioridad];
 
           tBody.innerHTML += `
-            <tr class="${tarea.realizada ? 'tarea-completada' : ''}">  
+            <tr class="${tarea.realizada ? 'bg-danger text-decoration-line-through' : ''}" style="--bs-bg-opacity: .4;" >  
                 <td> ${tarea.descripcion} </td>
                 <td> ${tarea.fechaFormateada} </td>
                 <td> 
-                    <span class="badge bg-${colorPrioridad}"> ${tarea.prioridadString} </span>
+                    <span class="badge bg-${colorPrioridad} ${tarea.realizada ? 'text-decoration-line-through' : ''} "> ${tarea.prioridadString} </span>
                 </td>
-                <td>
-                  <label>
-                    <input type="checkbox" ${tarea.realizada ? 'checked' : ''} onchange="completarTarea(${tarea.tareaID});" ${tarea.eliminada ? 'disabled' : ''} />
-                    Listo
+                <td class="text-center">
+                  <label class="form-check ">
+                    <input type="checkbox" ${tarea.realizada ? 'checked' : ''} onchange="completarTarea(${tarea.tareaID});" ${tarea.eliminada ? 'disabled' : ''} class="form-check-input" />
                   </label>
                 </td>
                 <td> ${acciones} </td>
@@ -62,7 +84,9 @@ function guardarTarea() {
     prioridad: $('#prioridad').val()
   }
 
-  console.log(nuevaTarea)
+  if(nuevaTarea.descripcion.trim() === '' || nuevaTarea.fecha.trim() === '' || nuevaTarea.prioridad === '-1'){
+    alert('Complete los campos requeridos')
+  }
 
   $.ajax({
     url : '../../Tareas/GuardarTarea',
@@ -70,10 +94,17 @@ function guardarTarea() {
     type : 'POST',
     dataType : 'json',
     success : function(resultado) {
+      if(resultado == 2){
+        alert('Ya tienes una tarea con esa descripcion')
+        return;
+      }
+
       if(resultado === 1){
         obtenerTareas()
+        limpiarFormulario();
         $('#modal').modal('hide');
       }
+
     },
     error: function (error){
       console.log(error)
@@ -162,4 +193,13 @@ function completarTarea(tareaId){
   }
 }
 
-window.onload = obtenerTareas();
+window.onload = function () {
+  obtenerTareas();
+
+  const selectPrioridades = document.getElementById('prioridad')
+  selectPrioridades.insertAdjacentHTML(
+    "afterbegin", 
+    `<option value="-1" selected> --- SELECCIONE UNA PRIORIDAD ---  </option>`
+  );
+
+}

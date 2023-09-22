@@ -1,61 +1,16 @@
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
 body {
+  margin-bottom: 60px;
   font-family: 'Work Sans', sans-serif;
 }
 
-.admin-panel {
-  width: 350px !important;
-  max-height: 100vh;
-  overflow-y: auto;
-  /* margin-left: 0; */
-  transition: margin-left ease-in-out .3s;
-  position: fixed !important;
-}
-
-.hide {
-  margin-left: -350px
-}
-
-.admin-panel + main {
-  width: 100% !important;
-  margin-left: 400px !important;
-  transition: margin-left ease-in-out .3s;
-}
-
-.admin-panel.hide + main {
-  margin: 1rem 50px !important;
-  transition: margin-left ease-in-out .3s;
-}
-
-.date_task {
-  top: 65px;
-  z-index: 99;
-  background-color: #fff;
-}
-
-.fw-semibold {
-  font-weight: 600 !important;
-}
-
-@media screen and (max-width: 760px) {
-  .admin-panel,
-  #btn-toggle {
-    display: none !important;
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
   }
-
-  .admin-panel + main {
-    margin: 1rem 50px !important;
-  }
-
-  .btn-offcanvas {
-    display: inline-block !important;
-  }
-
-  #offcanvasScrolling {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-}
-
-.tarea-completada {
-  background-color: #d1e7dd;
 }

@@ -27,10 +27,12 @@ public class TareasController : Controller
 
     public IActionResult Index()
     {
-        var directions = from Prioridades d in Enum.GetValues(typeof(Prioridades))
-           select new { ID = ((int)d).ToString(), Name = d.ToString() };
+        var prioridadesValues = Enum.GetValues(typeof(Prioridades));
+        var prioridades = 
+            from Prioridades p in prioridadesValues
+            select new { ID = (int)p, Nombre = p.ToString() };
 
-        ViewBag.Prioridades = new SelectList(directions , "ID", "Name");
+        ViewBag.Prioridades = new SelectList(prioridades , "ID", "Nombre");
         
         return View();
     }
@@ -40,8 +42,8 @@ public class TareasController : Controller
 
         IEnumerable<Tarea> tareas = _context.Tareas
             .Where(t => t.UsuarioID == usuarioIDActual)
-            .OrderBy(t=> t.Prioridad)
-            .OrderByDescending(tarea => tarea.Fecha);
+            .OrderByDescending(t=> t.Fecha)
+            .ThenBy(tarea => tarea.Prioridad);
 
         if(tareaId != null){
             tareas = tareas.Where(tarea => tarea.TareaID == tareaId);
@@ -50,35 +52,53 @@ public class TareasController : Controller
         return Json(tareas);
     }
 
-    public JsonResult GuardarTarea(int tareaId, string descripcion, DateTime fecha, Prioridades prioridad)
+    public JsonResult GuardarTarea(int tareaId, string descripcion, DateTime fecha, int prioridad)
     {
         int resultado = 0;
 
         string usuarioIDActual = _userManager.GetUserId(HttpContext.User);
 
-        if(!string.IsNullOrEmpty(descripcion)){
+        if(!string.IsNullOrEmpty(descripcion) && fecha != default && prioridad != -1){
+            descripcion = descripcion.ToLower().Trim();
+            
             if(tareaId == 0){
+
                 Tarea nuevaTarea = new (){
                     Descripcion = descripcion,
                     Fecha = fecha,
-                    Prioridad = prioridad,
+                    Prioridad = (Prioridades)prioridad,
                     UsuarioID = usuarioIDActual
                 };
 
-                _context.Tareas.Add(nuevaTarea);
-                _context.SaveChanges();
-                resultado = 1;
-            } else {
-                Tarea? tareaActualizar = _context.Tareas
-                    .FirstOrDefault(t=> t.TareaID == tareaId && t.UsuarioID == usuarioIDActual);
+                Tarea? tareaYaExistente = _context.Tareas
+                    .FirstOrDefault(t=> t.Descripcion.ToLower().Trim() == descripcion && t.UsuarioID == usuarioIDActual);
 
-                if(tareaActualizar != null){
-                    tareaActualizar.Descripcion = descripcion;
-                    tareaActualizar.Prioridad = prioridad;
-                    tareaActualizar.Fecha = fecha;
-
+                if(tareaYaExistente != null){
+                    resultado = 2;
+                } else {
+                    _context.Tareas.Add(nuevaTarea);
                     _context.SaveChanges();
                     resultado = 1;
+                }
+
+            } else {
+                Tarea? tareaYaExistente = _context.Tareas
+                    .FirstOrDefault(t=> t.Descripcion.ToLower().Trim() == descripcion && t.TareaID != tareaId && t.UsuarioID == usuarioIDActual);
+                
+                if(tareaYaExistente == null){
+                    Tarea? tareaActualizar = _context.Tareas
+                        .FirstOrDefault(t=> t.TareaID == tareaId && t.UsuarioID == usuarioIDActual);
+
+                    if(tareaActualizar != null){
+                        tareaActualizar.Descripcion = descripcion;
+                        tareaActualizar.Prioridad = (Prioridades)prioridad;
+                        tareaActualizar.Fecha = fecha;
+
+                        _context.SaveChanges();
+                        resultado = 1;
+                    }
+                } else {
+                    resultado = 2;
                 }
 
             }
