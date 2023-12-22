@@ -7,10 +7,79 @@ html {
 body {
   margin-bottom: 60px;
   font-family: 'Work Sans', sans-serif;
+  --bs-warning-rgb: 255, 226, 80;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
+.admin-panel {
+  width: 350px !important;
+  max-height: 100vh;
+  overflow-y: auto;
+  /* margin-left: 0; */
+  transition: margin-left ease-in-out .3s;
+  position: fixed !important;
+}
+
+.hide {
+  margin-left: -350px
+}
+
+.admin-panel + main {
+  width: 100% !important;
+  margin-left: 350px !important;
+  transition: margin-left ease-in-out .3s;
+}
+
+.admin-panel.hide + main {
+  margin: 0 50px !important;
+  transition: margin-left ease-in-out .3s;
+}
+
+.date_task {
+  top: 65px;
+  z-index: 99;
+  background-color: #fff;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.t-actions {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list-group-item:hover .t-actions {
+  display: initial;
+}
+
+#list-task-responsive {
+  overflow: scroll;
+  height: 100vh;
+}
+
+@media screen and (max-width: 760px) {
+  .admin-panel,
+  #btn-toggle {
+    display: none !important;
   }
+
+  .admin-panel + main {
+    margin: 1rem 15px !important;
+  }
+
+  .btn-offcanvas {
+    display: inline-block !important;
+  }
+
+  #offcanvasScrolling {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .date_task {
+    top: 50px;
+  }
+  
 }

@@ -40,68 +40,65 @@ public class TareasController : Controller
     public JsonResult ObtenerTareas (int? tareaId){
         string usuarioIDActual = _userManager.GetUserId(HttpContext.User);
 
-        IEnumerable<Tarea> tareas = _context.Tareas
-            .Where(t => t.UsuarioID == usuarioIDActual)
-            .OrderByDescending(t=> t.Fecha)
-            .ThenBy(tarea => tarea.Prioridad);
-
+        var tareas = _context.Tareas
+            .Where(t => t.UsuarioID == usuarioIDActual && !t.Eliminada);
+        
         if(tareaId != null){
-            tareas = tareas.Where(tarea => tarea.TareaID == tareaId);
+            tareas = tareas.Where(t=> t.TareaID == tareaId);
         }
 
-        return Json(tareas);
+        var tareasAgrupadas = tareas
+            .ToList() // Traer los datos de la base de datos a la memoria
+            .GroupBy(g => g.FechaFormateada)
+            .Select(f => new { fecha = f.Key, tareas = f.OrderBy(t=> t.Prioridad) })
+            .OrderByDescending(t=> t.fecha);
+
+        return Json(tareasAgrupadas);
     }
 
-    public JsonResult GuardarTarea(int tareaId, string descripcion, DateTime fecha, int prioridad)
+    public JsonResult GuardarTarea(int tareaId, string titulo, string descripcion, DateTime fecha, DateTime fechaFin, Prioridades prioridad)
     {
         int resultado = 0;
 
         string usuarioIDActual = _userManager.GetUserId(HttpContext.User);
 
-        if(!string.IsNullOrEmpty(descripcion) && fecha != default && prioridad != -1){
+        if(!string.IsNullOrEmpty(descripcion) && fecha != default && (int)prioridad != -1){
             descripcion = descripcion.ToLower().Trim();
             
             if(tareaId == 0){
 
                 Tarea nuevaTarea = new (){
+                    Titulo = titulo,
                     Descripcion = descripcion,
                     Fecha = fecha,
-                    Prioridad = (Prioridades)prioridad,
-                    UsuarioID = usuarioIDActual
+                    FechaFin = fechaFin,
+                    Prioridad = prioridad,
+                    UsuarioID = usuarioIDActual,
                 };
 
-                Tarea? tareaYaExistente = _context.Tareas
-                    .FirstOrDefault(t=> t.Descripcion.ToLower().Trim() == descripcion && t.UsuarioID == usuarioIDActual);
+                _context.Tareas.Add(nuevaTarea);
+                _context.SaveChanges();
+                resultado = 1;
+            } else {
+                Tarea? tareaActualizar = _context.Tareas
+                    .FirstOrDefault(t=> t.TareaID == tareaId && t.UsuarioID == usuarioIDActual);
 
-                if(tareaYaExistente != null){
-                    resultado = 2;
-                } else {
-                    _context.Tareas.Add(nuevaTarea);
+                if(tareaActualizar != null){
+                    tareaActualizar.Titulo = titulo;
+                    tareaActualizar.Descripcion = descripcion;
+                    tareaActualizar.Prioridad = prioridad;
+                    tareaActualizar.Fecha = fecha;
+                    tareaActualizar.FechaFin = fechaFin;
+
                     _context.SaveChanges();
                     resultado = 1;
-                }
-
-            } else {
-                Tarea? tareaYaExistente = _context.Tareas
-                    .FirstOrDefault(t=> t.Descripcion.ToLower().Trim() == descripcion && t.TareaID != tareaId && t.UsuarioID == usuarioIDActual);
-                
-                if(tareaYaExistente == null){
-                    Tarea? tareaActualizar = _context.Tareas
-                        .FirstOrDefault(t=> t.TareaID == tareaId && t.UsuarioID == usuarioIDActual);
-
-                    if(tareaActualizar != null){
-                        tareaActualizar.Descripcion = descripcion;
-                        tareaActualizar.Prioridad = (Prioridades)prioridad;
-                        tareaActualizar.Fecha = fecha;
-
-                        _context.SaveChanges();
-                        resultado = 1;
-                    }
                 } else {
                     resultado = 2;
                 }
 
-            }
+            } 
+
+            
         }
 
         return Json(resultado);
@@ -136,6 +133,7 @@ public class TareasController : Controller
         if (tareaAEliminar != null)
         {
             tareaAEliminar.Realizada = !tareaAEliminar.Realizada;
+            tareaAEliminar.FechaLimite = DateTime.Now;
             _context.SaveChanges();
             resultado = true;
         }
