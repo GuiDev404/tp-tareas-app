@@ -1,5 +1,6 @@
 body {
   font-family: 'Work Sans', sans-serif;
+  --bs-warning-rgb: 255, 226, 80;
 }
 
 .admin-panel {
@@ -17,12 +18,12 @@ body {
 
 .admin-panel + main {
   width: 100% !important;
-  margin-left: 400px !important;
+  margin-left: 350px !important;
   transition: margin-left ease-in-out .3s;
 }
 
 .admin-panel.hide + main {
-  margin: 1rem 50px !important;
+  margin: 0 50px !important;
   transition: margin-left ease-in-out .3s;
 }
 
@@ -36,6 +37,21 @@ body {
   font-weight: 600 !important;
 }
 
+.t-actions {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list-group-item:hover .t-actions {
+  display: initial;
+}
+
+#list-task-responsive {
+  overflow: scroll;
+  height: 100vh;
+}
+
 @media screen and (max-width: 760px) {
   .admin-panel,
   #btn-toggle {
@@ -43,7 +59,7 @@ body {
   }
 
   .admin-panel + main {
-    margin: 1rem 50px !important;
+    margin: 1rem 15px !important;
   }
 
   .btn-offcanvas {
@@ -54,6 +70,11 @@ body {
     display: flex !important;
     flex-direction: column !important;
   }
+
+  .date_task {
+    top: 50px;
+  }
+  
 }
 
 .tarea-completada {

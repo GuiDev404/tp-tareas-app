@@ -39,22 +39,22 @@ public class TareasController : Controller
         string usuarioIDActual = _userManager.GetUserId(HttpContext.User);
 
         var tareas = _context.Tareas
-            .Where(t => t.UsuarioID == usuarioIDActual)
+            .Where(t => t.UsuarioID == usuarioIDActual && !t.Eliminada);
+        
+        if(tareaId != null){
+            tareas = tareas.Where(t=> t.TareaID == tareaId);
+        }
+
+        var tareasAgrupadas = tareas
             .ToList() // Traer los datos de la base de datos a la memoria
             .GroupBy(g => g.FechaFormateada)
             .Select(f => new { fecha = f.Key, tareas = f.OrderBy(t=> t.Prioridad) })
             .OrderByDescending(t=> t.fecha);
 
-        if(tareaId != null){
-            // tareas = tareas
-            //     .Select(a=> a.tareas.FirstOrDefault(t=> t.TareaID == tareaId) )
-            //     .ToList();
-        }
-
-        return Json(tareas);
+        return Json(tareasAgrupadas);
     }
 
-    public JsonResult GuardarTarea(int tareaId, string descripcion, DateTime fecha, Prioridades prioridad)
+    public JsonResult GuardarTarea(int tareaId, string titulo, string descripcion, DateTime fecha, DateTime fechaFin, Prioridades prioridad)
     {
         int resultado = 0;
 
@@ -63,10 +63,12 @@ public class TareasController : Controller
         if(!string.IsNullOrEmpty(descripcion)){
             if(tareaId == 0){
                 Tarea nuevaTarea = new (){
+                    Titulo = titulo,
                     Descripcion = descripcion,
                     Fecha = fecha,
+                    FechaFin = fechaFin,
                     Prioridad = prioridad,
-                    UsuarioID = usuarioIDActual
+                    UsuarioID = usuarioIDActual,
                 };
 
                 _context.Tareas.Add(nuevaTarea);
@@ -77,9 +79,11 @@ public class TareasController : Controller
                     .FirstOrDefault(t=> t.TareaID == tareaId && t.UsuarioID == usuarioIDActual);
 
                 if(tareaActualizar != null){
+                    tareaActualizar.Titulo = titulo;
                     tareaActualizar.Descripcion = descripcion;
                     tareaActualizar.Prioridad = prioridad;
                     tareaActualizar.Fecha = fecha;
+                    tareaActualizar.FechaFin = fechaFin;
 
                     _context.SaveChanges();
                     resultado = 1;
@@ -120,6 +124,7 @@ public class TareasController : Controller
         if (tareaAEliminar != null)
         {
             tareaAEliminar.Realizada = !tareaAEliminar.Realizada;
+            tareaAEliminar.FechaLimite = DateTime.Now;
             _context.SaveChanges();
             resultado = true;
         }
