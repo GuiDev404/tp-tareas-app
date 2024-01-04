@@ -1,5 +1,5 @@
 html {
-  font-size: 14px;
+  font-size: 1rem;
   position: relative;
   min-height: 100%;
 }
@@ -10,33 +10,71 @@ body {
   --bs-warning-rgb: 255, 226, 80;
 }
 
+.textarea {
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+}
+
+.cursor-pointer { cursor: pointer; }
+
+ 
 .admin-panel {
-  width: 350px !important;
-  max-height: 100vh;
-  overflow-y: auto;
-  /* margin-left: 0; */
+  overscroll-behavior-block: contain;
+  
+  margin-left: 0;
   transition: margin-left ease-in-out .3s;
   position: fixed !important;
+
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 75px repeat(3, 1fr) 75px;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+
+  width: 350px !important;
+  max-height: 100vh;
+  min-height: 100vh;
+  z-index: 100;
+  background-color: #fff;
 }
 
-.hide {
-  margin-left: -350px
+.admin-panel-hide {
+  margin-left: -350px;
 }
 
-.admin-panel + main {
+.admin-panel__header {
+  grid-area: 1 / 1 / 2 / 6;
+}
+
+.admin-panel__main {
+  grid-area: 2 / 1 / 5 / 6;
+  min-height: 100%;
+  overflow-y: auto;
+
+  transition: margin-left ease-in-out .3s;
+
+}
+
+.admin-panel__footer {
+  grid-area: 5 / 1 / 6 / 6;
+}
+
+
+.wrapper > main {
   width: 100% !important;
   margin-left: 350px !important;
   transition: margin-left ease-in-out .3s;
 }
 
-.admin-panel.hide + main {
-  margin: 0 50px !important;
+.wrapper:has(.admin-panel-hide) > main {
+  margin-left: 50px !important;
   transition: margin-left ease-in-out .3s;
 }
 
 .date_task {
-  top: 65px;
-  z-index: 99;
+  top: 0;
+  z-index: 200 !important;
   background-color: #fff;
 }
 
@@ -44,42 +82,33 @@ body {
   font-weight: 600 !important;
 }
 
-.t-actions {
+.btn-hide-admin-panel {
   display: none;
-  margin: 0;
-  padding: 0;
 }
 
-.list-group-item:hover .t-actions {
-  display: initial;
-}
-
-#list-task-responsive {
-  overflow: scroll;
-  height: 100vh;
-}
 
 @media screen and (max-width: 760px) {
-  .admin-panel,
-  #btn-toggle {
-    display: none !important;
+  .wrapper > main {
+    margin: 0 !important;
   }
 
-  .admin-panel + main {
-    margin: 1rem 15px !important;
+  
+  .btn-hide-admin-panel {
+    display: block;
   }
 
-  .btn-offcanvas {
-    display: inline-block !important;
+}
+
+@media screen and (max-width: 480px) {
+  .admin-panel:not(.admin-panel-hide) {
+    width: 100% !important;
   }
 
-  #offcanvasScrolling {
-    display: flex !important;
-    flex-direction: column !important;
+ 
+  .wrapper:has(.admin-panel-hide) > main {
+    margin: 0 !important;
+    transition: margin-left ease-in-out .3s;
   }
 
-  .date_task {
-    top: 50px;
-  }
   
 }

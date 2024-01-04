@@ -5,12 +5,12 @@
 
 <div class="container my-3 mx-2">
 
-  <header class="d-flex justify-content-between align-items-center">
-      <h1 class="h2 fw-bold">Tarea</h1>
+  <header class="d-flex justify-content-start align-items-center mb-2 gap-3">
+      <h1 class="h2 fw-semibold mb-0">Tarea</h1>
       
-      @* <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modal">
-          Nueva Tarea
-      </button> *@
+      <button type="button" class="btn btn-sm btn-dark" onclick="limpiarFormulario()">
+         Limpiar campos 
+      </button>
   </header>
 
   <main>
@@ -19,36 +19,41 @@
 
         <div class="mb-3">
             <label for="titulo" class="form-label">Titulo</label>
-            <input type="text" class="form-control" id="titulo" placeholder="Ingrese un titulo para la tarea" />
+            <input type="text" name="titulo" class="form-control text-dark" id="titulo" placeholder="Ingrese un titulo para la tarea" />
         </div>
 
         <div class="mb-3">
             <label for="descripcion" class="form-label">Descripcion</label>
-            <textarea class="form-control" id="descripcion" placeholder="Ingrese una descripcion para la tarea" rows="3" style="height: 100px; min-height: 100px; max-height: 100px;"></textarea>
+            <textarea class="form-control text-dark textarea" name="descripcion" id="descripcion" placeholder="Ingrese una descripcion para la tarea" rows="3"></textarea>
         </div>
         
         <div class="row mb-3">
-          <div class="col-md-6 col-12">
+          <div class="col-md-4 col-sm-12 col-12">
               <label for="fecha" class="form-label">Fecha Inicio</label>
-              <input type="date" id="fecha" class="form-control" />
+              <input type="date" name="fecha" id="fecha" class="form-control text-dark" />
           </div>
-          <div class="col-md-6 col-12">
+          <div class="col-md-4 col-sm-12 col-12">
               <label for="fecha_vencimiento" class="form-label">Fecha Vencimiento</label>
-              <input type="date" id="fecha_vencimiento" class="form-control"  />
+              <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control text-dark"  />
+          </div>
+          <div class="col-md-4 col-sm-12 col-12">
+              <label for="cantidad_dias" class="form-label">Dias restantes</label>
+              <input disabled type="number" name="cantidad_dias" id="cantidad_dias" class="form-control text-dark"  />
           </div>
         </div>
 
         <div class="mb-3">
             <label for="fecha" class="form-label">Prioridad</label>
               <select
+                  name="prioridad"
                   id="prioridad"
-                  class="form-control" 
+                  class="form-control text-dark" 
                   asp-items="@ViewBag.Prioridades"
               >
             </select>
         </div>
         
-        <button type="button" class="btn btn-dark w-25" onclick="guardarTarea()">Guardar</button>
+        <button type="button" class="btn btn-dark" onclick="guardarTarea()">Guardar</button>
     </form>
   </main>
 </div>
@@ -68,12 +73,6 @@
   </tbody>
 </table> *@
 
-<<<<<<< HEAD
-
-@section Scripts {
-    <script src="~/js/tareas.js"></script>
-}
-=======
  <div class="modal fade" id="modal_detalle" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -92,4 +91,3 @@
 </div> 
 
  
->>>>>>> personalizaciones
