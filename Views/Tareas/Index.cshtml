@@ -7,10 +7,6 @@
 
   <header class="d-flex justify-content-start align-items-center mb-2 gap-3">
       <h1 class="h2 fw-semibold mb-0">Tarea</h1>
-      
-      <button type="button" class="btn btn-sm btn-dark" onclick="limpiarFormulario()">
-         Limpiar campos 
-      </button>
   </header>
 
   <main>
@@ -54,6 +50,9 @@
         </div>
         
         <button type="button" class="btn btn-dark" onclick="guardarTarea()">Guardar</button>
+        <button type="button" class="btn btn-danger d-none" id="cancel-btn">
+          Cancelar edición
+        </button>
     </form>
   </main>
 </div>

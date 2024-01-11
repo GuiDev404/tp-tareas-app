@@ -19,6 +19,19 @@ const fechaAInput = (fecha)=> {
   return `${año}-${mes}-${diaDelMes}`
 };
 
+const currentUrl = new URL(window.location.href)
+const params = currentUrl.searchParams;
+
+$('.admin-panel__main').prepend(
+  contenidoVacioListaTareas({ text: 'No se encontraron tareas, pruebe con otros filtros.' })
+)
+
+$('#priority').val(params.get('priority') || '-1')
+$('#status').val(params.get('status') || '-1')
+
+const filtros = document.querySelectorAll('#priority, #status')
+
+
 const sumarDiasAFecha = (fecha, dias = 1)=> {
   const fechaMasDias = new Date(fecha.setDate(fecha.getDate() + dias))
   const fechaInput = fechaAInput(fechaMasDias);
@@ -161,45 +174,96 @@ $(document).ready(function (){
   })
 })
 
-function limpiarFormulario() {
+function limpiarFormulario () {
   document.getElementById('modalForm').reset()
   document.getElementById('tareaId').value = 0;
 }
 
+function busquedaFiltros (){
+    const currentURL = new URL(this.window.location.href);
+    const params = currentURL.searchParams;
+    
+    const status = params.get('status');
+    const priority = params.get('priority');
+    
+    if(status || priority){
+      if(!$('#no-results').length){
+        $('.admin-panel__main').prepend(
+          contenidoVacioListaTareas({ text: 'No se encontraron tareas, pruebe con otros filtros.' })
+        )
+      }
+      $('#no-results').addClass('d-none')
+      
 
+      const hideElements = element=> element.classList.add('d-none')
+      const showElements = element=> {
+        element.classList.remove('d-none')
+  
+        const parent = element.parentElement;
+        if(parent && parent.classList.contains('tasks_date')){
+          parent.firstElementChild.classList.remove('d-none');
+        }
+        
+      }
+  
+      const TODAS_LAS_TAREAS = document.querySelectorAll('.list-group-item');
+      const FECHAS_TAREAS = document.querySelectorAll('.date_task');
+      FECHAS_TAREAS.forEach(hideElements)
+      TODAS_LAS_TAREAS.forEach(hideElements)
+      
+      let listaTarea = TODAS_LAS_TAREAS
+      if((priority === '-1' || !priority) && (status === '-1' || !status)){
+        listaTarea = TODAS_LAS_TAREAS;
+      } else if ((priority && priority !== '-1') && (!status || status === '-1')) {
+        listaTarea = document.querySelectorAll(`.list-group-item[data-priority="${priority}"]`);
+      } else if ((status && status !== '-1') && (!priority || priority === '-1')) {
+        listaTarea = document.querySelectorAll(`.list-group-item[data-status="${status}"]`);
+      } else {
+        listaTarea = document.querySelectorAll(`.list-group-item[data-status="${status}"][data-priority="${priority}"]`);
+      }
+  
+      if(listaTarea.length){
+     
+        listaTarea.forEach(showElements);
+      } else {
+        
+        $('#no-results').removeClass('d-none')
+      }
+    }
+  
+  
+}
 
-function obtenerTareas() {
+function obtenerTareas({ isInit = false } = {}) {
 
   $.ajax({
     url : '../../Tareas/ObtenerTareas',
     type : 'GET',
     dataType : 'json',
     success : function(resultado) {
+      // resultado = []
       if(resultado){
-        
         const listTask = document.getElementById('list-task')
-        const listFooter = document.getElementById('list-footer')
+        // const listFooter = document.getElementById('list-footer')
         
         const bgPrioridades = ['bg-danger', 'bg-warning', 'bg-info']
 
-        let filtros = `<div class="d-flex gap-2 justify-content-center align-items-center p-2 h-100">
+        // let filtros = `<div class="d-flex gap-2 justify-content-center align-items-center p-2 h-100">
        
-            <select class="form-select form-select-sm" id="priority" >
-              <option selected value="-1" class="text-muted">[PRIORIDAD]</option>
-              <option value="0">ALTA</option>
-              <option value="1">MEDIA</option>
-              <option value="2">BAJA</option>
-            </select>
-            <select class="form-select form-select-sm" id="status" >
-              <option selected value="-1" class="text-muted">[ESTADO]</option>
-              <option value="0">EN CURSO</option>
-              <option value="1">FINALIZADA</option>
-            </select>
+        //     <select class="form-select form-select-sm" id="priority" >
+        //       <option selected value="-1" class="text-muted">[PRIORIDAD]</option>
+        //       <option value="0">ALTA</option>
+        //       <option value="1">MEDIA</option>
+        //       <option value="2">BAJA</option>
+        //     </select>
+        //     <select class="form-select form-select-sm" id="status" >
+        //       <option selected value="-1" class="text-muted">[ESTADO]</option>
+        //       <option value="0">EN CURSO</option>
+        //       <option value="1">FINALIZADA</option>
+        //     </select>
          
-        </div>`
+        // </div>`
   
-        console.log(resultado);
-
         const tareasHTML = resultado.map(tarea=> `
           <div class="tasks_date">
             <p class="my-0 position-sticky bg-light text-dark py-2 px-3 border-bottom border-top date_task">
@@ -214,7 +278,7 @@ function obtenerTareas() {
               
               
               return `
-              <div class="list-group-item list-group-item-action py-3 lh-tight cursor-pointer border-end-0" data-id="${t.tareaID}" data-priority="${t.prioridad}" data-status="${Number(t.realizada)}">
+              <div title="VER DETALLE" class="list-group-item list-group-item-action py-3 lh-tight cursor-pointer border-end-0" data-id="${t.tareaID}" data-priority="${t.prioridad}" data-status="${Number(t.realizada)}">
                 <div style="min-height: 30px" class="d-flex w-100 align-items-center justify-content-between">
                   <span class="${classTxtRealizada}">${t.titulo}</span>
                   
@@ -259,17 +323,22 @@ function obtenerTareas() {
         if(resultado.length > 0){
           listTask.classList.remove('d-flex','flex-column', 'justify-content-center', 'align-items-center')
           
-          listFooter.innerHTML = filtros;
+          // listFooter.innerHTML = filtros;
           listTask.innerHTML = tareasHTML;
+
+          if(isInit){
+            busquedaFiltros()
+          }
 
         } else {
           listTask.classList.add('d-flex','flex-column', 'justify-content-center', 'align-items-center')
 
           listTask.innerHTML = contenidoVacioListaTareas({ text: 'No hay tareas aún.' })
-          listFooter.innerHTML = filtros;
+          $('#no-results').removeClass('d-none')
+
+          // listFooter.innerHTML = filtros;
         }
          
- 
       }
     },
     error: function (error){
@@ -292,7 +361,17 @@ function guardarTarea() {
 
 
   if(nuevaTarea.descripcion.trim() === '' || nuevaTarea.fecha.trim() === '' || nuevaTarea.prioridad === '-1'){
-    alert('Complete los campos requeridos')
+    Toastify({
+      text: "Complete los campos requeridos!",
+      className: "bg-success text-white rounded-2",
+      duration: 3000,
+      close: true,
+      gravity: "bottom", 
+      position: "right", 
+      style: {
+        background: "#dc3545",
+      }
+    }).showToast();
   }
 
   $.ajax({
@@ -302,14 +381,35 @@ function guardarTarea() {
     dataType : 'json',
     success : function(resultado) {
       if(resultado == 2){
-        alert('Ya tienes una tarea con esa descripcion')
+        Toastify({
+          text: "Ya tienes una tarea con esa descripcion!",
+          className: "bg-success text-white rounded-2",
+          duration: 3000,
+          close: true,
+          gravity: "bottom", 
+          position: "right", 
+          style: {
+            background: "#dc3545",
+          }
+        }).showToast();
         return;
       }
 
       if(resultado === 1){
         obtenerTareas()
         limpiarFormulario()
-        // $('#modal').modal('hide');
+        
+        Toastify({
+          text: "Tarea guardada correctamente!",
+          className: "bg-success text-white rounded-2",
+          duration: 3000,
+          close: true,
+          gravity: "bottom", 
+          position: "right", 
+          style: {
+            background: "#198754",
+          }
+        }).showToast();
       }
 
     },
@@ -349,7 +449,13 @@ function mostrarDetalleTarea(tarea) {
   console.log(tarea);
   $('#modal_detalle .modal-body').html(`
     <small class="mb-2 fw-light badge ${bgPrioridades[tarea.prioridad]}">
-    ${tarea.prioridadString} </small>
+      ${tarea.prioridadString}
+    </small>
+    
+    <small class="mb-2 fw-light badge ${tarea.realizada ? 'bg-danger' : 'bg-success'}">
+      ${tarea.realizada ? 'Realizada' : 'Activa'} 
+    </small>
+
     <h2 class="fw-semibold h4 text-capitalize"> 
       ${tarea.titulo}
     </h2>
@@ -368,6 +474,8 @@ function setearTarea(tarea) {
   $('#fecha').val(tarea.fechaFormateada);
   $('#fecha_vencimiento').val(tarea.fechaFinFormateada);
   $('#prioridad').val(tarea.prioridad);
+
+  $('#cancel-btn').removeClass('d-none')
 }
 
 function eliminarTarea(tareaId){
@@ -381,14 +489,21 @@ function eliminarTarea(tareaId){
       dataType: 'json'
     })
     .done(function (seElimino){
-      console.log(seElimino);
       obtenerTareas();
       
       if(seElimino){
-        alert('TAREA ELIMINADA')
-      } else {
-        alert('TAREA HABILITADA')  
-      }
+        Toastify({
+          text: "Tarea eliminada correctamente!",
+          className: "bg-success text-white rounded-2",
+          duration: 3000,
+          close: true,
+          gravity: "bottom", 
+          position: "right", 
+          style: {
+            background: "#198754",
+          }
+        }).showToast();
+      } 
       
     })
     .fail(function (error){
@@ -446,4 +561,27 @@ listTask.forEach(list=> {
   
 })
  
-window.onload = obtenerTareas();
+window.onload = function (){
+  obtenerTareas({ isInit: true })
+};
+
+$('#cancel-btn').on('click', function (event){
+  limpiarFormulario();
+  event.target.classList.add('d-none')
+})
+
+filtros.forEach(filtro=> {
+  filtro.addEventListener('input', function (e){
+
+    if(e.target !== null){
+      const { id,value } = e.target;
+
+      params.set(id, value.toLowerCase());
+      
+      window.history.pushState(null, null, currentUrl.href)
+      window.dispatchEvent(new Event('popstate'));
+    }
+  })
+})
+
+window.addEventListener('popstate', busquedaFiltros)

@@ -1,7 +1,7 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = "Perfil";
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
@@ -11,16 +11,23 @@
     <div class="col-md-6">
         <form id="profile-form" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
-                <input asp-for="Username" class="form-control" disabled />
-                <label asp-for="Username" class="form-label"></label>
+            
+            <div class="">
+                <label asp-for="Username" class="form-label">Correo</label>
+                <input asp-for="Username"  placeholder="Ingrese su nuemero de correo" class="form-control" disabled />
             </div>
-            <div class="form-floating">
-                <input asp-for="Input.PhoneNumber" class="form-control" />
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+
+            <div class="mt-2">
+                <label asp-for="Input.PhoneNumber" class="form-label">Numero telefono</label>
+                <input asp-for="Input.PhoneNumber" placeholder="Ingrese su nuemero de telefono" class="form-control" />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+
+            <div class="mt-3">
+                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">
+                    Guardar
+                </button>
+            </div>
         </form>
     </div>
 </div>
